@@ -11,6 +11,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="LockerClient.Test\**" />
+	  <EmbeddedResource Remove="LockerClient.Test\**" />
+	  <None Remove="LockerClient.Test\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<OpenApiReference Include="..\..\..\GolandProjects\golock2\openapi.yml" CodeGenerator="NSwagCSharp" Namespace="RestClient" ClassName="LockerHttp" Link="OpenAPIs\openapi.yml" />
 	</ItemGroup>
 
