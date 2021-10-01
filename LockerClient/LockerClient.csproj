@@ -6,18 +6,18 @@
 		<Description>C# client for Locker</Description>
 		<LangVersion>9.0</LangVersion>
 		<Authors>github.com\mes1234</Authors>
-		<CodeAnalysisRuleSet>lockerClient.ruleset</CodeAnalysisRuleSet>
+		<CodeAnalysisRuleSet>..\lockerClient.ruleset</CodeAnalysisRuleSet>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="LockerClient.Test\**" />
-	  <EmbeddedResource Remove="LockerClient.Test\**" />
-	  <None Remove="LockerClient.Test\**" />
+		<Compile Remove="LockerClient.Test\**" />
+		<EmbeddedResource Remove="LockerClient.Test\**" />
+		<None Remove="LockerClient.Test\**" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<OpenApiReference Include="..\..\..\GolandProjects\golock2\openapi.yml" CodeGenerator="NSwagCSharp" Namespace="RestClient" ClassName="LockerHttp" Link="OpenAPIs\openapi.yml" />
+		<OpenApiReference Include="..\..\..\..\GolandProjects\golock2\openapi.yml" CodeGenerator="NSwagCSharp" Namespace="RestClient" ClassName="LockerHttp" Link="OpenAPIs\openapi.yml" />
 	</ItemGroup>
 
 	<ItemGroup>

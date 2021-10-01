@@ -24,8 +24,6 @@ namespace LockerClient
         private HashSet<Guid> registeredLockers = new();
         private bool authorized;
 
-
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Locker"/> class.
         /// </summary>
@@ -40,8 +38,6 @@ namespace LockerClient
 
         /// <inheritdoc  />
         public byte[] this[string secretName] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-
 
         /// <inheritdoc  />
         public async Task<Guid> AddLockerAsync()
