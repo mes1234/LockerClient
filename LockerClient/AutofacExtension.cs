@@ -15,6 +15,7 @@ namespace LockerClient
         public static void RegisterLockerExtension(this ContainerBuilder builder)
         {
             _ = builder.RegisterType<Locker>().As<ILocker>();
+            _ = builder.RegisterType<Coder>().As<ICoder>();
         }
     }
 }

@@ -10,7 +10,8 @@ namespace LockerClient.Test
         [Fact]
         public async Task Authorization_Test()
         {
-            ILocker locker = new Locker();
+            ICoder coder = new Coder();
+            ILocker locker = new Locker(coder);
 
             await locker.AuthorizeAsync("witek", "test123");
 
@@ -19,7 +20,8 @@ namespace LockerClient.Test
         [Fact]
         public async Task AddLocker_Test()
         {
-            ILocker locker = new Locker();
+            ICoder coder = new Coder();
+            ILocker locker = new Locker(coder);
 
             await locker.AuthorizeAsync("witek", "test123");
 

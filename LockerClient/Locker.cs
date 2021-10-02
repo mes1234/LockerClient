@@ -19,33 +19,41 @@ namespace LockerClient
     /// <remarks>This is test implementation</remarks>
     public class Locker : ILocker
     {
-        private readonly HttpClient httpClient;
-        private readonly LockerHttp lockerHttp;
-        private HashSet<Guid> registeredLockers = new();
-        private bool authorized;
+        private readonly HttpClient _httpClient;
+        private readonly LockerHttp _lockerHttp;
+        private readonly ICoder _coder;
+        private HashSet<Guid> _registeredLockers = new();
+        private bool _authorized;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Locker"/> class.
         /// </summary>
-        public Locker()
+        /// <param name="coder">coder to use</param>
+        public Locker(ICoder coder)
         {
-            httpClient = new HttpClient();
-            lockerHttp = new LockerHttp(httpClient);
+            _httpClient = new HttpClient();
+            _lockerHttp = new LockerHttp(_httpClient);
+            _coder = coder ?? throw new ArgumentNullException(nameof(coder));
         }
 
         /// <inheritdoc  />
-        public bool Authorized => authorized;
+        public bool Authorized => _authorized;
 
         /// <inheritdoc  />
-        public byte[] this[string secretName] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public byte[] this[string secretName]
+        {
+            get => GetData(secretName).Result;
+            set => SaveData(secretName, value).Wait();
+        }
 
         /// <inheritdoc  />
         public async Task<Guid> AddLockerAsync()
         {
-            var response = await lockerHttp.AddlockerAsync();
+            var response = await _lockerHttp.AddlockerAsync();
             if (Guid.TryParse(response.Lockerid, out var lockerId))
             {
-                registeredLockers.Add(lockerId);
+                _registeredLockers.Add(lockerId);
                 return lockerId;
             }
             else
@@ -57,25 +65,65 @@ namespace LockerClient
         /// <inheritdoc  />
         public async Task AuthorizeAsync(string username, string password)
         {
-            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new Token
+            using var payload = Streamify(new Token
             {
                 Username = username,
                 Password = password,
             });
 
-            var bytes = Encoding.UTF8.GetBytes(payload);
-            using var stream = new MemoryStream(bytes);
-            var response = await lockerHttp.TokenAsync(stream);
+            var response = await _lockerHttp.TokenAsync(payload);
 
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", response.Token);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", response.Token);
 
-            authorized = true;
+            _authorized = true;
         }
 
         /// <inheritdoc  />
         public void Connect(Guid lockerId)
         {
             throw new NotImplementedException();
+        }
+
+        private async Task<byte[]> GetData(string secretName)
+        {
+            if (!_authorized) throw new AuthorizationException();
+
+            using var payload = Streamify(new GetItem
+            {
+                Lockerid = Guid.NewGuid().ToString(),
+                Secretid = secretName,
+            });
+
+            var content = await _lockerHttp.GetAsync(payload);
+
+            return _coder.Decode(content.Content);
+        }
+
+        private async Task SaveData(string secretName, byte[] content)
+        {
+            if (!_authorized) throw new AuthorizationException();
+
+            using var payload = Streamify(new AddItem
+            {
+                Lockerid = Guid.NewGuid().ToString(),
+                Secretid = secretName,
+                Content = _coder.Encode(content),
+            });
+
+            var response = await _lockerHttp.AddAsync(payload);
+
+        }
+
+
+
+        private MemoryStream Streamify(object obj)
+        {
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+
+            var bytes = Encoding.UTF8.GetBytes(payload);
+            var stream = new MemoryStream(bytes);
+
+            return stream;
         }
     }
 }
