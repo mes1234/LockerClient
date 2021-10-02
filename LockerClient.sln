@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		lockerClient.ruleset = lockerClient.ruleset
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LockerClient.Example", "LockerClient.Example\LockerClient.Example.csproj", "{FEC86BF0-BD51-430E-AE4D-3A329F51197C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{FCA509CE-E1BA-4B45-985B-2EA8342A2BA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCA509CE-E1BA-4B45-985B-2EA8342A2BA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCA509CE-E1BA-4B45-985B-2EA8342A2BA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEC86BF0-BD51-430E-AE4D-3A329F51197C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEC86BF0-BD51-430E-AE4D-3A329F51197C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEC86BF0-BD51-430E-AE4D-3A329F51197C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEC86BF0-BD51-430E-AE4D-3A329F51197C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

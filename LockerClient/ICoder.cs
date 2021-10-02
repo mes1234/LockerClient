@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace LockerClient
@@ -30,7 +31,11 @@ namespace LockerClient
         /// <inheritdoc />
         public byte[] Decode(string content)
         {
-            return Convert.FromBase64String(content);
+            var padding = new char[-content.Length & 3];
+            Array.Fill<char>(padding, '=');
+            var paddedContent = $"{content}{new string(padding)}";
+
+            return Convert.FromBase64String(paddedContent);
         }
 
         /// <inheritdoc />

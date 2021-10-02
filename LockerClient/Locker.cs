@@ -22,9 +22,8 @@ namespace LockerClient
         private readonly HttpClient _httpClient;
         private readonly LockerHttp _lockerHttp;
         private readonly ICoder _coder;
-        private HashSet<Guid> _registeredLockers = new();
+        private Guid _registeredLocker;
         private bool _authorized;
-
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Locker"/> class.
@@ -50,15 +49,22 @@ namespace LockerClient
         /// <inheritdoc  />
         public async Task<Guid> AddLockerAsync()
         {
-            var response = await _lockerHttp.AddlockerAsync();
-            if (Guid.TryParse(response.Lockerid, out var lockerId))
+            try
             {
-                _registeredLockers.Add(lockerId);
-                return lockerId;
+                var response = await _lockerHttp.AddlockerAsync();
+                if (Guid.TryParse(response.Lockerid, out var lockerId))
+                {
+                    _registeredLocker = lockerId;
+                    return lockerId;
+                }
+                else
+                {
+                    throw new NullReferenceException("Cannot add new locker");
+                }
             }
-            else
+            catch (RestClient.ApiException)
             {
-                throw new NullReferenceException("Cannot add new locker");
+                throw new AuthorizationException("Client is not authorized");
             }
         }
 
@@ -70,18 +76,24 @@ namespace LockerClient
                 Username = username,
                 Password = password,
             });
+            try
+            {
+                var response = await _lockerHttp.TokenAsync(payload);
 
-            var response = await _lockerHttp.TokenAsync(payload);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", response.Token);
 
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", response.Token);
-
-            _authorized = true;
+                _authorized = true;
+            }
+            catch (RestClient.ApiException)
+            {
+                throw new AuthorizationException("Client is authorization failed");
+            }
         }
 
         /// <inheritdoc  />
-        public void Connect(Guid lockerId)
+        public void UseLocker(Guid lockerId)
         {
-            throw new NotImplementedException();
+            _registeredLocker = lockerId;
         }
 
         private async Task<byte[]> GetData(string secretName)
@@ -90,7 +102,7 @@ namespace LockerClient
 
             using var payload = Streamify(new GetItem
             {
-                Lockerid = Guid.NewGuid().ToString(),
+                Lockerid = _registeredLocker.ToString(),
                 Secretid = secretName,
             });
 
@@ -105,16 +117,13 @@ namespace LockerClient
 
             using var payload = Streamify(new AddItem
             {
-                Lockerid = Guid.NewGuid().ToString(),
+                Lockerid = _registeredLocker.ToString(),
                 Secretid = secretName,
                 Content = _coder.Encode(content),
             });
 
             var response = await _lockerHttp.AddAsync(payload);
-
         }
-
-
 
         private MemoryStream Streamify(object obj)
         {

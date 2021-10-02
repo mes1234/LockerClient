@@ -42,8 +42,6 @@ namespace LockerClient
         /// Define which locker to use
         /// </summary>
         /// <param name="lockerId">Locker to work with</param>
-        public void Connect(Guid lockerId);
-
-
+        public void UseLocker(Guid lockerId);
     }
 }
