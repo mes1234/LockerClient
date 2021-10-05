@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using LockerClient;
+using Serilog;
 
 namespace LockerExample
 {
@@ -13,6 +14,10 @@ namespace LockerExample
             var builder = new ContainerBuilder();
             builder.RegisterLockerExtension();
             builder.RegisterType<Worker>();
+            builder.RegisterInstance<ILogger>(new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .CreateLogger());
 
             var worker = builder.Build().Resolve<Worker>();
 
@@ -24,23 +29,31 @@ namespace LockerExample
 
     public class Worker
     {
+        private readonly ILogger _logger;
         private readonly ILocker _locker;
 
-        public Worker(ILocker locker)
+        public Worker(
+            ILogger logger,
+            ILocker locker)
         {
+            _logger = logger;
             _locker = locker;
         }
 
         public async Task Start()
         {
             await _locker.AuthorizeAsync("witek", "test123");
-            var lockerId = await _locker.AddLockerAsync();
+            //var lockerId = await _locker.AddLockerAsync();
+
+            var lockerId = Guid.Parse("7ff9bf42-cb8c-4100-a900-4a8bad90638d");
+
+            _logger.Information("Attached to {lockerId}", lockerId);
 
             _locker.UseLocker(lockerId);
 
-            _locker["yello"] = Encoding.UTF8.GetBytes("yello");
+            //_locker["yello"] = Encoding.UTF8.GetBytes("yello");
 
-            var data = _locker["yello"];
+            _logger.Information("Got {data}, for {key}", Encoding.UTF8.GetString(_locker["yello"]), "yello");
         }
     }
 }
